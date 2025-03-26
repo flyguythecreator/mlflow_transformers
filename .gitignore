@@ -1,17 +1,36 @@
 # MLflow
+mlflow
 mlruns/
+*.mlflow
+*.json
+*.yaml
+*.yml
 mlartifacts/
 outputs/
 mlruns.db
 **/basic_auth.db
 
-# Mac
+# Database files
+*.sqlite3
+*.db
+*.db-journal
+
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
 
 # Byte-compiled / optimized / DLL files
 __pycache__
+__pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
+*.whl
 
 # C extensions
 *.so
