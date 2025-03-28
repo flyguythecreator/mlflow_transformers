@@ -106,7 +106,6 @@ trainer = Trainer(
 
 # If you are running this tutorial in local mode, leave the next line commented out.
 # Otherwise, uncomment the following line and set your tracking uri to your local or remote tracking server.
-
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 # Pick a name that you like and reflects the nature of the runs that you will be recording to the experiment.
