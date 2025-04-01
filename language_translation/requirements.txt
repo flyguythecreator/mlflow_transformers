@@ -1,0 +1,11 @@
+evaluate
+transformers
+datasets
+numpy
+torch
+mlflow
+PyMySQL
+psycopg2-binary
+werkzeug
+mlflow-extra
+accelerate
