@@ -38,19 +38,19 @@ def display_table(dataset_or_sample):
   display(HTML(styled_html))
 
 
-print(display_table(dataset.select(range(3))))
+logger.info(display_table(dataset.select(range(3))))
 
 # Split the dataset
 split_dataset = dataset.train_test_split(test_size=0.2, seed=42)
 train_dataset = split_dataset["train"]
 test_dataset = split_dataset["test"]
 
-print(f"Training dataset contains {len(train_dataset)} text-to-SQL pairs")
-print(f"Test dataset contains {len(test_dataset)} text-to-SQL pairs")
-print("Training Dataset: ", train_dataset)
-print("Training Dataset Shape: ", train_dataset.shape)
-print("Testing Dataset: ", test_dataset)
-print("Testing Dataset Shape: ", test_dataset.shape)
+logger.info(f"Training dataset contains {len(train_dataset)} text-to-SQL pairs")
+logger.info(f"Test dataset contains {len(test_dataset)} text-to-SQL pairs")
+logger.info("Training Dataset: ", train_dataset)
+logger.info("Training Dataset Shape: ", train_dataset.shape)
+logger.info("Testing Dataset: ", test_dataset)
+logger.info("Testing Dataset Shape: ", test_dataset.shape)
 
 # Define the prompt template
 PROMPT_TEMPLATE = """You are a powerful text-to-SQL model. Given the SQL tables and natural language question, your job is to write SQL query that answers the question.
@@ -75,7 +75,7 @@ def apply_prompt_template(row):
 
 
 train_dataset = train_dataset.map(apply_prompt_template)
-print(display_table(train_dataset.select(range(1))))
+logger.info(display_table(train_dataset.select(range(1))))
 
 # Pad the Training Dataset
 ## You can use a different max length if your custom dataset has shorter/longer input sequences.
@@ -105,7 +105,7 @@ tokenized_train_dataset = train_dataset.map(tokenize_and_pad_to_fixed_length)
 
 assert all(len(x["input_ids"]) == MAX_LENGTH for x in tokenized_train_dataset)
 
-print(display_table(tokenized_train_dataset.select(range(1))))
+logger.info(display_table(tokenized_train_dataset.select(range(1))))
 
 # Load the Base Model (with 4-bit quantization)
 quantization_config = BitsAndBytesConfig(
@@ -167,7 +167,7 @@ peft_config = LoraConfig(
 
 peft_model = get_peft_model(model, peft_config)
 peft_model.print_trainable_parameters()
-print(peft_model)
+logger.info(peft_model)
 
 # Kickoff Training Job
 # If you are running this tutorial in local mode, leave the next line commented out.
@@ -234,7 +234,7 @@ signature = infer_signature(
   # Parameters are saved with default values if specified
   params={"max_new_tokens": 256, "repetition_penalty": 1.15, "return_full_text": False},
 )
-print("Model Infrense Signature: ", signature)
+logger.info("Model Inference Signature: ", signature)
 
 # Get the ID of the MLflow Run that was automatically created above
 last_run_id = mlflow.last_active_run().info.run_id
@@ -271,4 +271,4 @@ mlflow_model = mlflow.pyfunc.load_model(f"runs:/{last_run_id}/model")
 
 # Inference parameters like max_tokens_length are set to default values specified in the Model Signature
 generated_query = mlflow_model.predict(test_prompt)[0]
-print(display_table({"prompt": test_prompt, "generated_query": generated_query}))
+logger.info(display_table({"prompt": test_prompt, "generated_query": generated_query}))
