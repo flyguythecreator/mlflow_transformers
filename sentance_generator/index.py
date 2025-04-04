@@ -2,13 +2,20 @@
 # %env TOKENIZERS_PARALLELISM=false
 
 import warnings
+import logging
+import os
+import transformers
+import mlflow
+
 
 # Disable a few less-than-useful UserWarnings from setuptools and pydantic
 warnings.filterwarnings("ignore", category=UserWarning)
 
-import transformers
+# region Logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-import mlflow
+logger = logging.getLogger()
+
 
 # Define the task that we want to use (required for proper pipeline construction)
 task = "text2text-generation"
@@ -33,7 +40,7 @@ signature = mlflow.models.infer_signature(
   params=parameters,
 )
 # Visualize the signature
-print(signature)
+logger.info(signature)
 
 # Log the model
 # model_info = mlflow.sklearn.log_model(
@@ -102,6 +109,6 @@ predictions = sentence_generator.predict(
 formatted_predictions = format_predictions(predictions)
 
 for i, formatted_text in enumerate(formatted_predictions):
-  print(f"Response to prompt {i + 1}:{formatted_text}")
+  logger.info(f"Response to prompt {i + 1}:{formatted_text}")
 
 

@@ -1,3 +1,5 @@
+import logging
+import os
 import pandas as pd
 from datasets import load_dataset
 from IPython.display import HTML, display
@@ -14,9 +16,14 @@ base_model_id = "mistralai/Mistral-7B-v0.1"
 dataset_name = "b-mc2/sql-create-context"
 dataset = load_dataset(dataset_name, split="train")
 
-# Prepair the dataset
+# region Logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+logger = logging.getLogger()
+
+# Prepare the dataset
 def display_table(dataset_or_sample):
-  # A helper fuction to display a Transformer dataset or single sample contains multi-line string nicely
+  # A helper function to display a Transformer dataset or single sample contains multi-line string nicely
   pd.set_option("display.max_colwidth", None)
   pd.set_option("display.width", None)
   pd.set_option("display.max_rows", None)
@@ -40,8 +47,8 @@ test_dataset = split_dataset["test"]
 
 print(f"Training dataset contains {len(train_dataset)} text-to-SQL pairs")
 print(f"Test dataset contains {len(test_dataset)} text-to-SQL pairs")
-print("Traning Dataset: ", train_dataset)
-print("Traning Dataset Shape: ", train_dataset.shape)
+print("Training Dataset: ", train_dataset)
+print("Training Dataset Shape: ", train_dataset.shape)
 print("Testing Dataset: ", test_dataset)
 print("Testing Dataset Shape: ", test_dataset.shape)
 
@@ -208,7 +215,7 @@ with mlflow.start_run() as run:
   trainer.train()
 
 
-# Infrense Prompt Template
+# Inference Prompt Template
 # Basically the same format as we applied to the dataset. However, the template only accepts {prompt} variable so both table and question need to be fed in there.
 prompt_template = """You are a powerful text-to-SQL model. Given the SQL tables and natural language question, your job is to write SQL query that answers the question.
 
@@ -217,7 +224,7 @@ prompt_template = """You are a powerful text-to-SQL model. Given the SQL tables 
 ### Response:
 """
 
-# Infrence Parameters to Track
+# Inference Parameters to Track
 sample = train_dataset[1]
 
 # MLflow infers schema from the provided sample input/output/params
@@ -250,7 +257,7 @@ with mlflow.start_run(run_id=last_run_id):
   )
 
 
-# We only input table and question, since system prompt is adeed in the prompt template.
+# We only input table and question, since system prompt is added in the prompt template.
 test_prompt = """
 ### Table:
 CREATE TABLE table_name_50 (venue VARCHAR, away_team VARCHAR)

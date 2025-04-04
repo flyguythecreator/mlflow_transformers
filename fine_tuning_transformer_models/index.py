@@ -1,4 +1,6 @@
 import warnings
+import logging
+import os
 import mlflow
 import evaluate
 import numpy as np
@@ -14,9 +16,14 @@ from transformers import (
 # Disable a few less-than-useful UserWarnings from setuptools and pydantic
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# region Logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+logger = logging.getLogger()
+
 # Load the "sms_spam" dataset.
 sms_dataset = load_dataset("sms_spam")
-# print(sms_dataset)
+# logger.info(sms_dataset)
 
 # Split train/test by an 8/2 ratio.
 sms_train_test = sms_dataset["train"].train_test_split(test_size=0.2)
@@ -24,15 +31,15 @@ train_dataset = sms_train_test["train"]
 test_dataset = sms_train_test["test"]
 
 # Print the Prepared Datasets
-# print("Training Dataset: ", train_dataset)
-# print("Training Dataset Data: ", train_dataset[:5])
-# print("Test Dataset: ", test_dataset)
-# print("SSM Training Test Dataset: ", sms_train_test)
+# logger.info("Training Dataset: ", train_dataset)
+# logger.info("Training Dataset Data: ", train_dataset[:5])
+# logger.info("Test Dataset: ", test_dataset)
+# logger.info("SSM Training Test Dataset: ", sms_train_test)
 
 # Training Dataset Shape
-# print("Training Dataset Shape: ", train_dataset.shape)
-# print("Test Dataset Shape: ", test_dataset.shape)
-# print("SSM Training Test Dataset Shape: ", sms_train_test.shape)
+# logger.info("Training Dataset Shape: ", train_dataset.shape)
+# logger.info("Test Dataset Shape: ", test_dataset.shape)
+# logger.info("SSM Training Test Dataset Shape: ", sms_train_test.shape)
 
 # Load the tokenizer for "distilbert-base-uncased" model.
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
@@ -51,16 +58,16 @@ seed = 22
 
 # Tokenize the train and test datasets
 train_tokenized = train_dataset.map(tokenize_function)
-# print("Tokenized Training Dataset Full: ", train_tokenized)
+# logger.info("Tokenized Training Dataset Full: ", train_tokenized)
 train_tokenized = train_tokenized.remove_columns(["sms"]).shuffle(seed=seed)
-# print("Tokenized Training Dataset No SMS: ", train_tokenized)
-# print("Tokenized Training Dataset Data: ", train_tokenized[:5])
+# logger.info("Tokenized Training Dataset No SMS: ", train_tokenized)
+# logger.info("Tokenized Training Dataset Data: ", train_tokenized[:5])
 
 
 test_tokenized = test_dataset.map(tokenize_function)
-# print("Tokenized Test Dataset Full: ", test_tokenized)
+# logger.info("Tokenized Test Dataset Full: ", test_tokenized)
 test_tokenized = test_tokenized.remove_columns(["sms"]).shuffle(seed=seed)
-# print("Tokenized Test Dataset No SMS: ", test_tokenized)
+# logger.info("Tokenized Test Dataset No SMS: ", test_tokenized)
 
 # Set the mapping between int label and its meaning.
 id2label = {0: "ham", 1: "spam"}
@@ -131,7 +138,7 @@ quick_check = (
   "Do we need to get Paul involved here, or do you truly believe, as you said, 'nah, they got this'?"
 )
 
-print("Pipeline Validation With Realistic Input: ", tuned_pipeline(quick_check))
+logger.info("Pipeline Validation With Realistic Input: ", tuned_pipeline(quick_check))
 
 # Define a set of parameters that we would like to be able to flexibly override at inference time, along with their default values
 model_config = {"batch_size": 8}
@@ -165,4 +172,4 @@ validation_text = (
 )
 
 # validate the performance of our fine-tuning
-print("Validation of the Loaded Fine-Tuned Model With Realistic Input: ", loaded(validation_text))
+logger.info("Validation of the Loaded Fine-Tuned Model With Realistic Input: ", loaded(validation_text))

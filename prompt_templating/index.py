@@ -1,11 +1,18 @@
 from transformers import pipeline
 import mlflow
+import logging
+import os
+
+# region Logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+logger = logging.getLogger()
 
 
 generator = pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T")
 
 user_input = "Tell me the largest bird"
-print("User Input: ", user_input)
+logger.info("User Input: ", user_input)
 prompt_templates = [
   # no template
   "{prompt}",
@@ -19,13 +26,13 @@ prompt_templates = [
       "Assistant: "
   ),
 ]
-print("Prompt Template: ", prompt_templates)
+logger.info("Prompt Template: ", prompt_templates)
 responses = generator(
   [template.format(prompt=user_input) for template in prompt_templates], max_new_tokens=15
 )
 for idx, response in enumerate(responses):
-  print(f"Response to Template #{idx}:")
-  print(response[0]["generated_text"] + "")
+  logger.info(f"Response to Template #{idx}:")
+  logger.info(response[0]["generated_text"] + "")
 
 # Creating a Model Signature of MLFlow Monitoring 
 sample_input = "Tell me the largest bird"
@@ -37,7 +44,7 @@ signature = mlflow.models.infer_signature(
 )
 
 # visualize the signature
-print("Visualizing the Generated MLFlow Model Signature: ", signature)
+logger.info("Visualizing the Generated MLFlow Model Signature: ", signature)
 
 # If you are running this tutorial in local mode, leave the next line commented out.
 # Otherwise, uncomment the following line and set your tracking uri to your local or remote tracking server.
@@ -63,4 +70,4 @@ with mlflow.start_run():
 
 loaded_generator = mlflow.pyfunc.load_model(model_uri=model_info.model_uri)
 
-print("Loaded Model Prediction: ", loaded_generator.predict("Tell me the largest bird"))
+logger.info("Loaded Model Prediction: ", loaded_generator.predict("Tell me the largest bird"))

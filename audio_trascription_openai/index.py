@@ -1,4 +1,6 @@
 import warnings
+import logging
+import os
 import requests
 import transformers
 import mlflow
@@ -7,6 +9,11 @@ from sklearn import datasets, metrics
 
 # Disable a few less-than-useful UserWarnings from setuptools and pydantic
 warnings.filterwarnings("ignore", category=UserWarning)
+
+# region Logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+logger = logging.getLogger()
 
 # Acquire an audio file that is in the public domain
 resp = requests.get(
@@ -62,7 +69,7 @@ signature = mlflow.models.infer_signature(
 )
 
 # Visualize the signature
-print(signature)
+logger.info(signature)
 
 # If you are running this tutorial in local mode, leave the next line commented out.
 # Otherwise, uncomment the following line and set your tracking uri to your local or remote tracking server.
@@ -95,7 +102,7 @@ loaded_transcriber = mlflow.transformers.load_model(model_uri=model_info.model_u
 # Perform transcription with the native pipeline implementation
 transcription = loaded_transcriber(audio)
 
-# print(f"Whisper native output transcription: {format_transcription(transcription['text'])}")
+# logger.info(f"Whisper native output transcription: {format_transcription(transcription['text'])}")
 
 # Load the saved transcription pipeline as a generic python function
 pyfunc_transcriber = mlflow.pyfunc.load_model(model_uri=model_info.model_uri)
@@ -104,4 +111,4 @@ pyfunc_transcriber = mlflow.pyfunc.load_model(model_uri=model_info.model_uri)
 pyfunc_transcription = pyfunc_transcriber.predict([audio])
 
 # Note: the pyfunc return type if `return_timestamps` is set is a JSON encoded string.
-# print(f"Pyfunc output transcription: {format_transcription(pyfunc_transcription[0])}")
+# logger.info(f"Pyfunc output transcription: {format_transcription(pyfunc_transcription[0])}")
